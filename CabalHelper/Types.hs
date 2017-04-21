@@ -18,7 +18,7 @@
 module CabalHelper.Types where
 
 import GHC.Generics
-import Data.Version
+import Distribution.Version
 
 newtype ChModuleName = ChModuleName String
     deriving (Eq, Ord, Read, Show, Generic)

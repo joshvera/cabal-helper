@@ -27,7 +27,6 @@ import Data.Char
 import Data.List
 import Data.Maybe
 import Data.String
-import Data.Version
 import Text.Printf
 import System.Directory
 import System.FilePath
@@ -39,6 +38,7 @@ import Prelude
 
 import Distribution.System (buildPlatform)
 import Distribution.Text (display)
+import Distribution.Version
 
 import Paths_cabal_helper (version)
 import CabalHelper.Data
@@ -116,7 +116,7 @@ compileHelper opts cabalVer projdir distdir = withHelperSources $ \chdir -> do
    compileCabalSource :: FilePath -> MaybeT IO (Either ExitCode FilePath)
    compileCabalSource chdir = do
        let cabalFile = projdir </> "Cabal.cabal"
-           isCabalMagicVer = cabalVer == Version [1,9999] []
+           isCabalMagicVer = cabalVer == mkVersion [1,9999]
        cabalSrc <- liftIO $ doesFileExist cabalFile
 
        when isCabalMagicVer $
@@ -166,7 +166,7 @@ compile distdir opts@Options {..} Compile {..} = do
 
     let (mj:mi:_) = case compCabalVersion of
                      Left _commitid -> [1, 10000]
-                     Right (Version vs _) -> vs
+                     Right vv -> versionNumbers vv -- (Version vs _) -> vs
     let ghc_opts =
              concat [
           [ "-outputdir", outdir
@@ -209,10 +209,10 @@ exePath compCabalVersion = do
 
 exePath' :: Either String Version -> FilePath -> FilePath
 exePath' (Left commitid) outdir =
-    outdir </> "cabal-helper-" ++ showVersion version -- our ver
+    outdir </> "cabal-helper-" ++ showVersion (mkVersion' version) -- our ver
             ++ "-Cabal-HEAD-" ++ commitid
 exePath' (Right compCabalVersion) outdir =
-    outdir </> "cabal-helper-" ++ showVersion version -- our ver
+    outdir </> "cabal-helper-" ++ showVersion (mkVersion' version) -- our ver
             ++ "-Cabal-" ++ showVersion compCabalVersion
 
 callProcessStderr' :: Maybe FilePath -> FilePath -> [String] -> IO ExitCode
@@ -280,7 +280,7 @@ cabalInstall opts db e_ver_msrcdir = do
         , "--prefix=" ++ db </> "prefix"
         , "--with-ghc=" ++ ghcProgram opts
         ]
-        , if cabalInstallVer >= Version [1,20,0,0] []
+        , if cabalInstallVer >= mkVersion [1,20,0,0]
              then ["--no-require-sandbox"]
              else []
         , if ghcPkgProgram opts /= ghcPkgProgram defaultOptions
@@ -305,19 +305,19 @@ cabalInstall opts db e_ver_msrcdir = do
 
 patchyCabalVersions :: [([Version], FilePath -> IO ())]
 patchyCabalVersions = [
-    ( [ Version [1,18,1] [] ]
+    ( [ mkVersion [1,18,1] ]
     , fixArrayConstraint
     ),
 
 
-    ( [ Version [1,18,0] [] ]
+    ( [ mkVersion [1,18,0] ]
     , \dir -> do
         fixArrayConstraint dir
         fixOrphanInstance dir
     ),
 
     -- just want the pristine version
-    ( [ Version [1,24,1,0] [] ]
+    ( [ mkVersion [1,24,1,0] ]
     , \_ -> return ()
     )
   ]

@@ -1,10 +1,11 @@
 module CabalHelper.Sandbox where
 
+import CabalHelper.Common
 import Control.Applicative
 import Data.Char
 import Data.Maybe
 import Data.List
-import Data.Version
+import Distribution.Version
 import System.FilePath
 import System.Directory
 import Prelude

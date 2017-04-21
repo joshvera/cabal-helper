@@ -10,6 +10,7 @@ import qualified Distribution.Simple.InstallDirs as ID
 import Distribution.Simple.LocalBuildInfo
 import Distribution.Simple.Program
 import Distribution.PackageDescription
+import Distribution.Types.UnqualComponentName (unUnqualComponentName)
 
 import qualified Data.Map as M
 import Data.Map (Map)
@@ -84,9 +85,10 @@ xInstallTarget pd lbi cf fn = do
         copydest  = fromFlag (copyDest cf)
         verbosity = fromFlag (copyVerbosity cf)
         InstallDirs { bindir, libexecdir } = absoluteInstallDirs pd lbi' copydest
-        progprefix = substPathTemplate (packageId pd) lbi (progPrefix lbi)
-        progsuffix = substPathTemplate (packageId pd) lbi (progSuffix lbi)
-        fixedExeBaseName = progprefix ++ exeName exe ++ progsuffix
+        uId = mkLegacyUnitId (packageId pd)
+        progprefix = substPathTemplate (packageId pd) lbi uId (progPrefix lbi)
+        progsuffix = substPathTemplate (packageId pd) lbi uId (progSuffix lbi)
+        fixedExeBaseName = progprefix ++ unUnqualComponentName (exeName exe) ++ progsuffix
 
         fixedExeFileName = bindir </> fixedExeBaseName <.> exeExtension
         newExeFileName   = libexecdir </> fixedExeBaseName <.> exeExtension
@@ -94,15 +96,24 @@ xInstallTarget pd lbi cf fn = do
     createDirectoryIfMissingVerbose verbosity True libexecdir
     renameFile fixedExeFileName newExeFileName
 
-  fn pd_regular lbi
+  fn pd lbi
 
  where
    isInternal :: Executable -> Bool
    isInternal exe =
     fromMaybe False $ (=="True") <$> lookup "x-internal" (customFieldsBI $ buildInfo exe)
 
+-- Since cabal-2.0 something changed in the logic:
+-- unmodified version returns
+--   internal error: the package description contains no component corresponding to CExeName (UnqualComponentName "cabal-helper-wrapper")
+-- or 
+--   internal error: the package description contains no component corresponding to CLibName
+-- My guess is that ComponentGraph keeps dependencies inside PackageDescription even if we strip them using the function below.
+-- Workaround I did is to just build everything two times (line 99: fn pd_regular lbi -> fn pd lbi)
 onlyExePackageDesc :: [Executable] -> PackageDescription -> PackageDescription
-onlyExePackageDesc exes pd = emptyPackageDescription {
-                     package = package pd
-                   , executables = exes
-                   }
+--onlyExePackageDesc exes pd = emptyPackageDescription {
+--                     package = package pd
+--                   , executables = exes
+--                   }
+onlyExePackageDesc exes pd = pd {executables = exes}
+

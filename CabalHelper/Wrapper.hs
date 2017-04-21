@@ -22,7 +22,6 @@ import Data.Char
 import Data.List
 import Data.Maybe
 import Data.String
-import Data.Version
 import Text.Printf
 import System.Console.GetOpt
 import System.Environment
@@ -38,6 +37,7 @@ import Distribution.Text (display)
 import Distribution.Verbosity (silent, deafening)
 import Distribution.PackageDescription.Parse (readPackageDescription)
 import Distribution.Package (packageName, packageVersion)
+import Distribution.Version
 
 import Paths_cabal_helper (version)
 import CabalHelper.Common
@@ -116,7 +116,7 @@ main = handlePanic $ do
   case args of
     [] -> usage
     "help":[] -> usage
-    "version":[] -> putStrLn $ showVersion version
+    "version":[] -> putStrLn $ showVersion (mkVersion' version)
     "print-appdatadir":[] -> putStrLn =<< appDataDir
     "print-build-platform":[] -> putStrLn $ display buildPlatform
 

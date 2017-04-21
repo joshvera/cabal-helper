@@ -22,7 +22,6 @@ import Control.Exception as E
 import Control.Monad
 import Data.List
 import Data.Maybe
-import Data.Version
 import Data.Typeable
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
@@ -34,6 +33,8 @@ import System.Directory
 import System.FilePath
 import Text.ParserCombinators.ReadP
 import Prelude
+import Distribution.Version
+import qualified Data.Version as DV
 
 data Panic = Panic String deriving (Typeable, Show)
 instance Exception Panic
@@ -71,10 +72,15 @@ parsePkgId bs =
       _ -> Nothing
 
 parseVer :: String -> Version
-parseVer vers = runReadP parseVersion vers
+parseVer vers = mkVersion' $ runReadP DV.parseVersion vers
+--parseVer vers = runReadP parseVersion vers
+
+showVersion :: Version -> String
+showVersion = DV.showVersion . DV.makeVersion . versionNumbers
 
 majorVer :: Version -> Version
-majorVer (Version b _) = Version (take 2 b) []
+majorVer = mkVersion . take 2 . versionNumbers
+-- (Version b _) = Version (take 2 b) []
 
 sameMajorVersionAs :: Version -> Version -> Bool
 sameMajorVersionAs a b = majorVer a == majorVer b

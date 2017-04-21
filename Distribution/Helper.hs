@@ -83,7 +83,7 @@ import Control.Exception as E
 import Data.Char
 import Data.List
 import Data.Maybe
-import Data.Version
+import Distribution.Version
 import Data.Typeable
 import Distribution.Simple.BuildPaths (exeExtension)
 import System.Environment

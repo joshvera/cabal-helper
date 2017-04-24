@@ -34,7 +34,7 @@ import Distribution.PackageDescription (PackageDescription,
                                         TestSuiteInterface(..),
                                         BenchmarkInterface(..),
                                         withLib)
-#if CABAL_MAJOR == 1 && CABAL_MINOR >= 25
+#if CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR >= 25)
 import Distribution.PackageDescription (unFlagName, mkFlagName)
 #endif
 import Distribution.PackageDescription.Parse (readPackageDescription)
@@ -51,7 +51,7 @@ import Distribution.Simple.LocalBuildInfo (LocalBuildInfo(..),
                                            externalPackageDeps,
                                            withComponentsLBI,
                                            withLibLBI)
-#if CABAL_MAJOR == 1 && CABAL_MINOR >= 23
+#if CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR >= 23)
 import Distribution.Simple.LocalBuildInfo (localUnitId)
 #elif CABAL_MAJOR == 1 && CABAL_MINOR <= 22
 import Distribution.Simple.LocalBuildInfo (inplacePackageId)
@@ -72,11 +72,11 @@ import Distribution.Text (display)
 import Distribution.Verbosity (Verbosity, silent, deafening, normal)
 import Distribution.Version (Version, mkVersion, versionNumbers)
 
-#if CABAL_MAJOR == 1 && CABAL_MINOR >= 22
+#if CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR >= 22)
 import Distribution.Utils.NubList
 #endif
 
-#if CABAL_MAJOR == 1 && CABAL_MINOR >= 25
+#if CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR >= 25)
 import Distribution.Types.ForeignLib (ForeignLib(..))
 import Distribution.Types.UnqualComponentName (unUnqualComponentName)
 #endif
@@ -219,7 +219,7 @@ main = do
 
     "compiler-version":[] -> do
       let CompilerId comp ver = compilerId $ compiler lbi
-      return $ Just $ ChResponseVersion (show comp) (toDataVersion ver)
+      return $ Just $ ChResponseVersion (show comp) ver
 
     "ghc-options":flags -> do
       res <- componentOptions lvd True flags id
@@ -294,7 +294,6 @@ main = do
 
     "licenses":[] -> do
       return $ Just $ ChResponseLicenses $
-             map (second (map (second toDataVersion))) $
                  displayDependencyLicenseList $
                      groupByLicense $ getDependencyInstalledPackageInfos lbi
 
@@ -378,7 +377,7 @@ componentOptions (lbi, v, distdir) inplaceFlag flags f =
     componentOptions' (lbi, v, distdir) inplaceFlag flags renderGhcOptions' f
 
 componentNameToCh CLibName = ChLibName
-#if CABAL_MAJOR == 1 && CABAL_MINOR >= 25
+#if CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR >= 25)
 componentNameToCh (CSubLibName n) = ChSubLibName $ unUnqualComponentName' n
 componentNameToCh (CFLibName   n) = ChFLibName $ unUnqualComponentName' n
 #endif
@@ -386,7 +385,7 @@ componentNameToCh (CExeName n) = ChExeName $ unUnqualComponentName' n
 componentNameToCh (CTestName n) = ChTestName $ unUnqualComponentName' n
 componentNameToCh (CBenchName n) = ChBenchName $ unUnqualComponentName' n
 
-#if CABAL_MAJOR == 1 && CABAL_MINOR >= 25
+#if CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR >= 25)
 unUnqualComponentName' = unUnqualComponentName
 #else
 unUnqualComponentName' = id
@@ -394,7 +393,7 @@ unUnqualComponentName' = id
 
 #if CABAL_MAJOR == 1 && CABAL_MINOR < 25
 componentNameFromComponent (CLib Library {}) = CLibName
-#elif CABAL_MAJOR == 1 && CABAL_MINOR >= 25
+#elif CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR >= 25)
 componentNameFromComponent (CLib Library { libName = Nothing }) = CLibName
 componentNameFromComponent (CLib Library { libName = Just n })  = CSubLibName n
 componentNameFromComponent (CFLib ForeignLib {..}) = CFLibName foreignLibName
@@ -470,7 +469,7 @@ removeInplaceDeps v lbi pd clbi = let
 
  where
    isInplaceDep :: (InstalledPackageId, PackageId) -> Bool
-#if CABAL_MAJOR == 1 && CABAL_MINOR >= 23
+#if CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR >= 23)
    isInplaceDep (ipid, pid) = localUnitId lbi == ipid
 #elif CABAL_MAJOR == 1 && CABAL_MINOR <= 22
    isInplaceDep (ipid, pid) = inplacePackageId pid == ipid
@@ -478,7 +477,7 @@ removeInplaceDeps v lbi pd clbi = let
 #endif
 
 
-#if CABAL_MAJOR == 1 && CABAL_MINOR >= 22
+#if CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR >= 22)
 -- >= 1.22 uses NubListR
 nubPackageFlags opts = opts
 #else
@@ -497,7 +496,7 @@ renderGhcOptions' lbi v opts = do
 #elif CABAL_MAJOR == 1 && CABAL_MINOR >= 20 && CABAL_MINOR < 24
 -- && CABAL_MINOR < 24
   return $ renderGhcOptions (compiler lbi) opts
-#elif CABAL_MAJOR == 1 && CABAL_MINOR >= 24
+#elif CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR >= 24)
 --  CABAL_MAJOR == 1 && CABAL_MINOR >= 24
   return $ renderGhcOptions (compiler lbi) (hostPlatform lbi) opts
 #endif

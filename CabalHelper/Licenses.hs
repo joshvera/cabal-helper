@@ -32,7 +32,7 @@ import Distribution.Version (Version)
 
 
 
-#if CABAL_MAJOR == 1 && CABAL_MINOR > 22
+#if CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR > 22)
 type CPackageIndex a = PackageIndex (InstalledPackageInfo)
 #elif CABAL_MAJOR == 1 && CABAL_MINOR >= 22
 type CPackageIndex a = PackageIndex (InstalledPackageInfo_ a)
@@ -40,7 +40,7 @@ type CPackageIndex a = PackageIndex (InstalledPackageInfo_ a)
 type CPackageIndex a = PackageIndex
 #endif
 
-#if CABAL_MAJOR == 1 && CABAL_MINOR >= 23
+#if CABAL_MAJOR == 2 || (CABAL_MAJOR == 1 && CABAL_MINOR >= 23)
 type CInstalledPackageId = UnitId
 lookupInstalledPackageId' :: PackageIndex a -> UnitId -> Maybe a
 lookupInstalledPackageId' = lookupUnitId

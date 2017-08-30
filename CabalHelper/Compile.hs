@@ -38,7 +38,7 @@ import Prelude
 
 import Distribution.System (buildPlatform)
 import Distribution.Text (display)
-import Distribution.Version
+import Distribution.Version hiding (showVersion)
 
 import Paths_cabal_helper (version)
 import CabalHelper.Data

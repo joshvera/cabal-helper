@@ -37,7 +37,7 @@ import Distribution.Text (display)
 import Distribution.Verbosity (silent, deafening)
 import Distribution.PackageDescription.Parse (readPackageDescription)
 import Distribution.Package (packageName, packageVersion)
-import Distribution.Version
+import Distribution.Version hiding (showVersion)
 
 import Paths_cabal_helper (version)
 import CabalHelper.Common

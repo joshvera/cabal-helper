@@ -5,7 +5,7 @@ import Control.Applicative
 import Data.Char
 import Data.Maybe
 import Data.List
-import Distribution.Version
+import Distribution.Version hiding (showVersion)
 import System.FilePath
 import System.Directory
 import Prelude
